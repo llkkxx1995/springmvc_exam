@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.webapp.mapper.CustomerMapper">
+    
+    <resultMap type="customer" id="customerMap">
+       <id property="customer_id" column="customer_id"></id>
+       <association property="address" javaType="java.lang.String" column="address_id" select="selectAddressById" />
+    </resultMap>
+    
+    <select id="selectCustomerByName" parameterType="customer" resultMap="customerMap">
+       select * from customer where first_name = #{first_name} and last_name=#{last_name}
+    </select>
+  
+  <select id="selectAddressById" parameterType="int" resultType="java.lang.String">
+     select address from address where address_id = #{id}
+  </select>
+  
+   <select id="countCustomerNum" resultType="int">
+      select count(*) from customer
+   </select>
+   
+   <select id="selectCustomerByPage" parameterType="page" resultMap="customerMap">
+      <bind name="preSize" value="size * page - size"/>
+      select * from customer order by customer_id LIMIT #{preSize}, #{size}
+   </select>
+   
+   <delete id="deleteCustomerById" parameterType="int">
+       delete from customer where customer_id = #{id}
+   </delete>
+   
+   
+   <select id="selectAddress" resultType="address">
+      select * from address
+   </select>
+   
+   
+   <select id="selectCustomerById" parameterType="int" resultType="customer">
+      select * from customer where customer_id = #{id}
+   </select>
+   
+   
+   <update id="updateCustomer" parameterType="customer">
+       update customer
+       <set>
+          <if test="first_name!=null">
+              first_name = #{first_name},
+          </if>
+          <if test="last_name!=null">
+              last_name = #{last_name},
+          </if>
+          <if test="email!=null">
+              email = #{email},
+          </if>
+          <if test="address_id!=null">
+              address_id = #{address_id}
+          </if>
+       </set>
+       where customer_id = #{customer_id}
+   </update>
+   
+   
+   <insert id="insertCustomer" parameterType="customer">
+     <selectKey keyProperty="customer_id" order="AFTER" resultType="int">
+         select last_insert_id();
+     </selectKey>
+     insert customer(first_name,last_name,email,address_id,last_update,store_id,create_date) values(#{first_name},#{last_name},#{email},#{address_id},#{last_update},#{store_id},#{create_date});
+   </insert>
+</mapper>
